@@ -6,7 +6,7 @@ import Foundation
 
 enum FocusFollowsMouseSupport {
     static let defaultDelayMilliseconds = 250
-    static let delayRange = 100...1_000
+    static let delayRange = 100...3_000
 
     static func sanitizedDelay(_ milliseconds: Int) -> Int {
         min(max(milliseconds, delayRange.lowerBound), delayRange.upperBound)
@@ -51,12 +51,15 @@ enum FocusFollowsMouseSupport {
 
     static func shouldActivate(targetWindowID: CGWindowID,
                                focusedWindowID: CGWindowID?,
+                               focusedWindowBlocksTarget: Bool,
                                targetAppIsFrontmost: Bool) -> Bool {
         guard targetAppIsFrontmost else { return true }
         // Games may not expose focus through Accessibility. Reasserting it can
         // release their captured pointer, so require a known different window.
         guard let focusedWindowID else { return false }
-        return focusedWindowID != targetWindowID
+        // A sheet or a modal window keeps focus and macOS hands it straight
+        // back, so asking for the window it blocks only flickers.
+        return focusedWindowID != targetWindowID && !focusedWindowBlocksTarget
     }
 
     /// A canceled focus handoff gives focus back to the window it took it

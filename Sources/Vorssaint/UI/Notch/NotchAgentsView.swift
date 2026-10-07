@@ -299,7 +299,7 @@ private struct NotchAgentLimitsCard: View {
                             .font(.system(size: 9.5))
                             .foregroundStyle(.secondary)
                         if let rate = todayUsage.tokens.cacheHitRate, rate > 0 {
-                            Text("· \(AgentFormat.percent(rate)) \(text.cached(""))".trimmingCharacters(in: .whitespaces))
+                            Text("· " + text.cached(AgentFormat.percent(rate)))
                                 .font(.system(size: 9.5))
                                 .foregroundStyle(.tertiary)
                         }
@@ -563,7 +563,9 @@ private struct NotchAgentTrendCard: View {
 
     private func caption(byCost: Bool) -> String {
         if let hovered, let bucket = buckets.first(where: { $0.start == hovered }) {
-            return label(bucket.start, long: true) + " · " + value(bucket.total, byCost: byCost)
+            // A pointed-at bar reads its tokens beside its cost.
+            let tokens = byCost ? " · " + value(bucket.total, byCost: false) : ""
+            return label(bucket.start, long: true) + " · " + value(bucket.total, byCost: byCost) + tokens
         }
         return text.period(period) + " · " + value(snapshot.usage(period).total, byCost: byCost)
     }
